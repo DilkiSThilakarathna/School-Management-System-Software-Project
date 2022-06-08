@@ -1,0 +1,39 @@
+{
+  "name": "sms_dbms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "seed": "node database/seed/seed.js",
+    "timetable": "node database/seed/timetable.js"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PulsaraSandeepa/sms-backend.git"
+  },
+  "author": "PG",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PulsaraSandeepa/sms-backend/issues"
+  },
+  "homepage": "https://github.com/PulsaraSandeepa/sms-backend#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mailgun-js": "^0.22.0",
+    "method-override": "^3.0.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.7",
+    "uuid": "^8.3.2"
+  }
+}
