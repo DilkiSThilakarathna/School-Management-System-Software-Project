@@ -934,6 +934,189 @@ exports.postCourseSettings = async (req, res, next) => {
 
 // 7. PARENTS
 // 7.1 Add parent
+
+// 7. PARENTS
+// 7.1 Add parent
+exports.getAddParent = async (req, res, next) => {
+  res.render('Admin/Parent/addParent', {
+    page_name: 'parent',
+  });
+};
+
+exports.postAddParent = async (req, res, next) => {
+  const { email } = req.body;
+  const sql1 = 'SELECT count(*) as `count` from parent where email = ?';
+  const count = (await queryParamPromise(sql1, [email]))[0].count;
+  if (count !== 0) {
+    req.flash('error', 'Parent with that email already exists');
+    res.redirect('/admin/addParent');
+  } else {
+    const {
+      dob,
+      name,
+      gender,
+      address,
+      city,
+      postalCode,
+      contact,
+    } = req.body;
+
+    if (contact.length > 11) {
+      req.flash('error', 'Enter a valid phone number');
+      return res.redirect('/admin/addParent');
+    }
+
+    const password = dob.toString().split('-').join('');
+    const hashedPassword = await bcrypt.hash(password, 8);
+
+    const sql2 = 'INSERT INTO parent SET ?';
+    await queryParamPromise(sql2, {
+      p_id: uuidv4(),
+      p_name: name,
+      gender: gender,
+      dob: dob,
+      email: email,
+      p_address: address + '-' + city + '-' + postalCode,
+      contact: contact,
+      password: hashedPassword,
+    });
+    req.flash('success_msg', 'Parent added successfully');
+    res.redirect('/admin/getAllParents');
+  }
+};
+// 2.2 Get parents on query
+exports.getRelevantParent = async (req, res, next) => {
+  const sql = 'SELECT dept_id from department';
+  const results = await zeroParamPromise(sql);
+  let departments = [];
+  for (let i = 0; i < results.length; ++i) {
+    departments.push(results[i].dept_id);
+  }
+  res.render('Admin/Parent/selectParent', {
+    departments: departments,
+    page_name: 'parent',
+  });
+};
+
+exports.postRelevantParent = async (req, res, next) => {
+  const { section, department } = req.body;
+  if (department === 'None' && section !== '') {
+    req.flash('error', 'Please select department for the given section');
+    res.redirect('/admin/getParent');
+  } else if (section !== '') {
+    const sql1 =
+        'select max(section) as `max_section` from student where dept_id = ?';
+    const max_section = (await queryParamPromise(sql1, [department]))[0]
+        .max_section;
+    if (max_section !== null && section <= max_section) {
+      // All teachers from given section and department
+      const sql2 = 'select c_id from course where dept_id = ?';
+      let course_ids = await queryParamPromise(sql2, [department]);
+      if (course_ids.length === 0) {
+        return res.render('Admin/Staff/getStaff', {
+          data: [],
+          page_name: 'staff',
+        });
+      }
+      const courses = [];
+      for (const course_id of course_ids) {
+        courses.push(course_id.c_id);
+      }
+      const sql3 = 'select st_id from class where section = ? and c_id in (?)';
+      const staff_ids = await queryParamPromise(sql3, [section, courses]);
+      if (staff_ids.length === 0) {
+        return res.render('Admin/Staff/getStaff', {
+          data: [],
+          page_name: 'staff',
+        });
+      }
+      const staffs = [];
+      for (const staff_id of staff_ids) {
+        staffs.push(staff_id.st_id);
+      }
+      const sql4 = 'select * from staff where st_id in (?)';
+      const results = await queryParamPromise(sql4, [staffs]);
+      return res.render('Admin/Staff/getStaff', {
+        data: results,
+        page_name: 'staff',
+      });
+    } else {
+      // section for the given department does not exist
+      req.flash('error', 'Section for the given department does not exist');
+      res.redirect('/admin/getStaff');
+    }
+  } else if (department !== 'None') {
+    // All teachers from particular department
+    const sql = 'select * from staff where dept_id = ?';
+    const results = await queryParamPromise(sql, [department]);
+    return res.render('Admin/Staff/getStaff', {
+      data: results,
+      page_name: 'staff',
+    });
+  } else {
+    return res.redirect('/admin/getAllStaffs');
+  }
+};
+
+// 7.3 Get all parents
+exports.getAllParent = async (req, res, next) => {
+  const sql = 'SELECT * FROM parent';
+  const results = await zeroParamPromise(sql);
+  res.render('Admin/Parent/getParent', { data: results, page_name: 'parent' });
+};
+
+// 7.4 Modify existing parents
+exports.getParentSettings = async (req, res, next) => {
+  const staffEmail = req.params.id;
+  const sql1 = 'SELECT * FROM staff WHERE email = ?';
+  const parentData = await queryParamPromise(sql1, [staffEmail]);
+  const address = staffData[0].p_address.split('-');
+  parentData[0].address = address;
+  const results = await zeroParamPromise('SELECT * from department');
+  let departments = [];
+  for (let i = 0; i < results.length; ++i) {
+    departments.push(results[i].dept_id);
+  }
+  res.render('Admin/Staff/setStaff', {
+    staffData: parentData,
+    departments: departments,
+    page_name: 'Parent Settings',
+  });
+};
+exports.postParentSettings = async (req, res, next) => {
+  const {
+    old_email,
+    email,
+    dob,
+    name,
+    gender,
+    department,
+    address,
+    city,
+    postalCode,
+    contact,
+  } = req.body;
+
+  const password = dob.toString().split('-').join('');
+  const hashedPassword = await hashing(password);
+
+  const sql =
+      'update parent set p_name=?, gender=?, dob=?, email=?, p_address=?, contact=?, password=? where email=?';
+  await queryParamPromise(sql, [
+    name,
+    gender,
+    dob,
+    email,
+    address + '-' + city + '-' + postalCode,
+    contact,
+    hashedPassword,
+    department,
+    old_email,
+  ]);
+  req.flash('success_msg', 'Parent added successfully');
+  res.redirect('/admin/getParent');
+};
+
 exports.getAddParent = async (req, res, next) => {
   res.render('Admin/Parent/addParent', {
     page_name: 'parent',
