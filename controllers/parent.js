@@ -267,6 +267,7 @@ exports.getForgotPassword = (req, res, next) => {
 };
 
 exports.forgotPassword = async (req, res, next) => {
+    
     const { email } = req.body;
     if (!email) {
         return res.status(400).render('Parent/forgotPassword');
@@ -277,7 +278,7 @@ exports.forgotPassword = async (req, res, next) => {
     const sql1 = 'SELECT * FROM parent WHERE email = ?';
     const results = await queryParamPromise(sql1, [email]);
     if (!results || results.length === 0) {
-        errors.push({ msg: 'That email is not registered!' });
+        errors.push({ msg: 'That E-mail is not registered!.Please register first' });
         return res.status(401).render('Parent/forgotPassword', {
             errors,
         });
