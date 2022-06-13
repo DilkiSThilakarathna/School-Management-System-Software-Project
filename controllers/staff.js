@@ -2,9 +2,30 @@ const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+const fs= require('fs');
+const path=require('path');
+// const dirPath= path.join(__dirname + '/public','doc');
+// console.log("dirPath",dirPath);
+
+const cur_dir = process.cwd();
+const dirPath= path.join(cur_dir + '/public','doc');
+let uploadFile;
+// change current directory
+
+// process.chdir('E:\\My_works\\17_batch\\new\\sms-backend');
+// console.log("process.cwd() ",process.cwd());
+//
+// // path.join for cross-platform paths:
+// process.chdir(path.join('E:', 'My_works', '17_batch'));
+// console.log("process.cwd() 2 ",process.cwd());
+
 const mailgun = require('mailgun-js');
+const multer = require("multer");
+const {v4: uuidv4} = require("uuid");
 const DOMAIN = process.env.DOMAIN_NAME;
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
+
+
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -361,3 +382,114 @@ exports.resetPassword = (req, res, next) => {
     }
   }
 };
+exports.postViewAssignment = async (req, res, next) => {
+  console.log("postViewAssignment");
+  fs.readdir(dirPath,(err,files)=>{
+    files.forEach((item)=>{
+      console.warn("file name is : ",item)
+    });
+  });
+}
+exports.getViewAssignment = async (req, res, next) => {
+  const sql = 'SELECT name FROM file';
+  const results = await zeroParamPromise(sql);
+  let fileNames = [];
+  for (let i = 0; i < results.length; i++) {
+    fileNames.push(results[i].name);
+    console.log(results[i].name);
+  }
+  res.render('Staff/viewAssignment', {
+    uploadFileNames: fileNames,
+    page_name: 'viewAssignment'
+  });
+  fileNames = [];
+}
+
+exports.getSpecificAssignment = async (req, res, next) => {
+  const studentFileName = req.params.name;
+  const sql1 = 'SELECT * FROM file WHERE name = ?';
+  const fileData = await queryParamPromise(sql1, [studentFileName]);
+  console.log("fileData[0].description",fileData[0].description);
+
+  res.render('Staff/viewSpecificAssignment', {
+    fileData: fileData[0].description,
+    page_name: 'viewSpecificAssignment',
+  });
+
+}
+
+//upload assignments by teacher
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+
+    // Uploads is the Upload_folder_name
+    cb(null, "public/assignment")
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + "-" + file.originalname + ".pdf");
+    uploadFile = file.fieldname + "-" + file.originalname + ".pdf";
+  }
+});
+
+const maxSize = 1 * 1000 * 1000 * 1000;
+
+const upload = multer({
+  storage: storage,
+  limits: {fileSize: maxSize},
+  fileFilter: function (req, file, cb) {
+
+    // Set the filetypes, it is optional
+    const filetypes = /pdf/;
+    const mimetype = filetypes.test(file.mimetype);
+
+    const extname = filetypes.test(path.extname(
+        file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+
+    cb("Error: File upload only supports the "
+        + "following filetypes - " + filetypes);
+  }
+
+// SMS is the name of file attribute
+}).single("myFile");
+
+
+exports.postAssignmentUploadByTeacher = async (req, res, next) => {
+  if (req.method == "POST") {
+    // create an incoming form object
+    upload(req,res,async function (err) {
+
+      if (err) {
+
+        // ERROR occured (here it can be occured due
+        // to uploading image of size greater than
+        // 1MB or uploading different file type)
+        res.send(err)
+      } else {
+
+        // SUCCESS, image successfully uploaded
+        const sql4 = 'INSERT INTO assignmentfile SET ?';
+        await queryParamPromise(sql4, {
+          id: uuidv4(),
+          name: uploadFile,
+          description: '/assignment/' + uploadFile,
+        });
+        req.flash('success_msg', 'Your Assignment uploaded in to SMS');
+        res.redirect('/Staff/dashboard');
+      }
+    });
+  }
+};
+
+exports.getAssignmentUploadByTeacher = async (req, res, next) => {
+  if(req.method == "GET"){
+    res.render('Staff/assignmentsByTeacher', {
+      page_name: 'assignmentsByTeacher',
+      uploadFilePath: '/assignment/'+ uploadFile,
+    });
+  }
+} 
