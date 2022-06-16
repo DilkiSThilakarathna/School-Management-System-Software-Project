@@ -10,16 +10,6 @@
     "timetable": "node database/seed/timetable.js"
 
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PulsaraSandeepa/sms-backend.git"
-  },
-  "author": "PG",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/PulsaraSandeepa/sms-backend/issues"
-  },
-  "homepage": "https://github.com/PulsaraSandeepa/sms-backend#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "connect-flash": "^0.1.1",
