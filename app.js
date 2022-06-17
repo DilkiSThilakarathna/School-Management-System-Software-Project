@@ -8,6 +8,7 @@ const session = require('express-session');
 const cors = require('cors');
 const methodOverride = require('method-override');
 
+
 const sql = require('./database/mysql');
 
 env.config();
@@ -45,11 +46,14 @@ const studentRoutes = require('./routes/student');
 const parentRoutes = require('./routes/parent');
 const homeRoutes = require('./routes/home');
 
+
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+
 
 app.use('/admin', adminRoutes);
 app.use('/staff', staffRoutes);

@@ -102,9 +102,8 @@ CREATE TABLE IF NOT EXISTS `attendance` (
 
 CREATE TABLE IF NOT EXISTS `marks` (
 	`test_id` INT NOT NULL AUTO_INCREMENT,
-	`tt_marks` INT,
-	`ob_marks` INT,
-	`test_type` INT,
+	`test_marks` INT,
+	`course_id` VARCHAR(36) NOT NULL,
 	`s_id` VARCHAR(36) NOT NULL,
 	PRIMARY KEY (`test_id`)
 );
@@ -123,6 +122,18 @@ CREATE TABLE IF NOT EXISTS `time_table` (
 	`start_time` TIME NOT NULL,
 	`end_time` TIME NOT NULL,
 	PRIMARY KEY (`c_id`,`section`,`day`)
+);
+
+CREATE TABLE `file` (
+                        `id` int(11) NOT NULL,
+                        `name` varchar(255) NOT NULL,
+                        `description` text NOT NULL
+);
+
+CREATE TABLE `assignmentfile` (
+                        `id` int(11) NOT NULL,
+                        `name` varchar(255) NOT NULL,
+                        `description` text NOT NULL
 );
 
 ALTER TABLE `course` ADD CONSTRAINT `course_fk0` FOREIGN KEY (`dept_id`) REFERENCES `department`(`dept_id`) on update cascade on delete restrict;
@@ -152,6 +163,10 @@ ALTER TABLE `assignment_submission` ADD CONSTRAINT `assignment_submission_fk1` F
 ALTER TABLE `time_table` ADD CONSTRAINT `time_table_fk0` FOREIGN KEY (`c_id`) REFERENCES `course`(`c_id`) on update cascade on delete restrict;
 
 ALTER TABLE `time_table` ADD CONSTRAINT `time_table_fk1` FOREIGN KEY (`st_id`) REFERENCES `staff`(`st_id`) on update cascade on delete restrict;
+
+ALTER TABLE `marks` ADD CONSTRAINT `marks_fk0` FOREIGN KEY (`course_id`) REFERENCES `course`(`c_id`) on update cascade on delete restrict;
+
+ALTER TABLE `marks` ADD CONSTRAINT `marks_fk1` FOREIGN KEY (`s_id`) REFERENCES `student`(`s_id`) on update cascade on delete restrict;
 
 alter table admin
 add resetLink varchar(255) default '';
