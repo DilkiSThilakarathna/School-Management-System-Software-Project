@@ -109,4 +109,13 @@ router.get('/getAllParents', requireAuth, controller.getAllParent);
 router.get('/settings/parent/:id', requireAuth, controller.getParentSettings);
 router.post('/settings/parent', requireAuth, controller.postParentSettings);
 
+// 4.CLASSES (subjects mapping courses ,staffs and section)
+// 4.1 Select class
+router.get('/getReport', requireAuth, controller.getReport);
+// 4.2 Add class
+router.get('/addReport', requireAuth, controller.getAddReport);
+router.post('/addReport', controller.postAddReport);
+
+
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require('express');
 const controller = require('../controllers/student');
 const { requireAuth, forwardAuth } = require('../middlewares/studentAuth');
+const {assignmentView, generatePdf}  = require('../controllers/student');
 
 const router = express.Router();
 
@@ -25,5 +26,16 @@ router.put('/forgot-password', controller.forgotPassword);
 // 1.6 RESET PASSWORD
 router.get('/resetpassword/:id', forwardAuth, controller.getResetPassword);
 router.put('/resetpassword', controller.resetPassword);
+
+//upload assignment
+router.get('/uploadAssignment', requireAuth, controller.getAssignmentUpload);
+router.post('/uploadAssignment', requireAuth, controller.postAssignmentUpload);
+
+//view assignments
+
+router.get('/viewAssignment', requireAuth, controller.viewAssignment);
+
+router.get('/viewSpecificAssignment/:name', requireAuth, controller.getSpecificAssignment);
+// router.get('/uploads', generatePdf);
 
 module.exports = router;

@@ -2,9 +2,18 @@ const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
+const multer = require('multer');
 const mailgun = require('mailgun-js');
+
+const fs = require('fs');
+const path = require('path');
+const {v4: uuidv4} = require("uuid");
+
 const DOMAIN = process.env.DOMAIN_NAME;
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
+
+let uploadFile;
+
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -32,6 +41,7 @@ const queryParamPromise = (sql, queryParam) => {
     });
   });
 };
+
 
 exports.getLogin = (req, res, next) => {
   res.render('Student/login');
@@ -260,6 +270,109 @@ exports.getLogout = (req, res, next) => {
   req.flash('success_msg', 'You are logged out');
   res.redirect('/student/login');
 };
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+
+    // Uploads is the Upload_folder_name
+    cb(null, "public/doc")
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + "-" + file.originalname + ".pdf");
+    uploadFile = file.fieldname + "-" + file.originalname + ".pdf";
+  }
+});
+
+const maxSize = 1 * 1000 * 1000 * 1000;
+
+const upload = multer({
+  storage: storage,
+  limits: {fileSize: maxSize},
+  fileFilter: function (req, file, cb) {
+
+    // Set the filetypes, it is optional
+    const filetypes = /pdf/;
+    const mimetype = filetypes.test(file.mimetype);
+
+    const extname = filetypes.test(path.extname(
+        file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+
+    cb("Error: File upload only supports the "
+        + "following filetypes - " + filetypes);
+  }
+
+// SMS is the name of file attribute
+}).single("myFile");
+
+
+exports.postAssignmentUpload = async (req, res, next) => {
+  if (req.method == "POST") {
+    // create an incoming form object
+    upload(req,res,async function (err) {
+
+      if (err) {
+
+        // ERROR occured (here it can be occured due
+        // to uploading image of size greater than
+        // 1MB or uploading different file type)
+        res.send(err)
+      } else {
+
+        // SUCCESS, image successfully uploaded
+        const sql3 = 'INSERT INTO file SET ?';
+        await queryParamPromise(sql3, {
+          id: uuidv4(),
+          name: uploadFile,
+          description: '/doc/' + uploadFile,
+        });
+        req.flash('success_msg', 'Your File uploaded in to SMS');
+        res.redirect('/Student/uploadAssignment');
+      }
+    });
+  }
+};
+
+exports.getAssignmentUpload = async (req, res, next) => {
+  if(req.method == "GET"){
+    res.render('Student/uploadAssignment', {
+      page_name: 'uploadAssignment',
+      uploadFilePath: '/doc/'+ uploadFile,
+    });
+  }
+}
+
+exports.viewAssignment = async (req, res, next) => {
+  const sql = 'SELECT name FROM assignmentfile';
+  const results = await zeroParamPromise(sql);
+  let assignmentFileNames = [];
+  for (let i = 0; i < results.length; i++) {
+    assignmentFileNames.push(results[i].name);
+    console.log(results[i].name);
+  }
+  res.render('Student/viewAssignment', {
+    uploadFileNames: assignmentFileNames,
+    page_name: 'viewAssignment'
+  });
+  assignmentFileNames = [];
+}
+
+exports.getSpecificAssignment = async (req, res, next) => {
+  const studentFileName = req.params.name;
+  const sql1 = 'SELECT * FROM assignmentfile WHERE name = ?';
+  const fileData = await queryParamPromise(sql1, [studentFileName]);
+  console.log("fileData[0].description",fileData[0].description);
+
+  res.render('Staff/viewSpecificAssignment', {
+    fileData: fileData[0].description,
+    page_name: 'viewSpecificAssignment' ,
+  });
+
+}
+
 
 // FORGOT PASSWORD
 exports.getForgotPassword = (req, res, next) => {

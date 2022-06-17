@@ -88,7 +88,17 @@
             </div>
         </li>
 
-
+        <li class="<% if (page_name === 'reports') { %>
+            dropdown active
+            <%} else { %>
+            dropdown
+            <% } %>">
+            <a class="ddbtn" href="#"><i class="fa fa-book-reader"></i>Manage Reports</a>
+            <div class="dropdown-content">
+                <a href="/admin/addReport">Add New Report</a>
+                <a href="/admin/getReport">Report Settings</a>
+            </div>
+        </li>
 
         <hr>
         <li class="<% if (page_name === 'settings') { %>

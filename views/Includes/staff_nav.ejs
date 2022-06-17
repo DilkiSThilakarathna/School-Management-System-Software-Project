@@ -45,6 +45,23 @@
                     <a href="/staff/timetable"><i class="fa fa-chalkboard"></i>Check TimeTable</a>
                 </li>
 
+                <li class="<% if (page_name === 'viewAssignment') { %>
+                     active
+                    <%} %>">
+                    <a href="/staff/viewAssignment"><i class="fa fa-chalkboard"></i>View Assignment</a>
+                </li>
+
+                <li class="<% if (page_name === 'viewSpecificAssignment') { %>
+                     active
+                    <%} %>">
+
+                </li>
+                <li class="<% if (page_name === 'assignmentsByTeacher') { %>
+                     active
+                    <%} %>">
+                    <a href="/staff/assignmentsByTeacher"><<i class="fa fa-file-upload"></i> Send Assignment</a>
+                </li>
+
                 <hr>
                 <li>
                     <a href="#"><i class="fa fa-cog"></i>Settings</a>

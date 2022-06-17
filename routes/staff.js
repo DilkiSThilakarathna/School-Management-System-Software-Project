@@ -38,4 +38,14 @@ router.put('/forgot-password', controller.forgotPassword);
 router.get('/resetpassword/:id', forwardAuth, controller.getResetPassword);
 router.put('/resetpassword', controller.resetPassword);
 
+//Upload Assignment
+router.get('/viewAssignment', requireAuth, controller.getViewAssignment);
+router.post('/viewAssignment', requireAuth, controller.postViewAssignment);
+
+//view submited assignment
+router.get('/viewSpecificAssignment/:name', requireAuth, controller.getSpecificAssignment);
+
+// see the assignments by teacher
+router.post('/assignmentsByTeacher', requireAuth, controller.postAssignmentUploadByTeacher);
+router.get('/assignmentsByTeacher', requireAuth, controller.getAssignmentUploadByTeacher);
 module.exports = router;
