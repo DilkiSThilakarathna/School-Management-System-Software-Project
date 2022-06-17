@@ -47,7 +47,7 @@
                                                             <% for (let i = 0; i < dayNames.length; ++i) {%>
                                                             <tr>
                                                                 <th><%=dayNames[i]%></th>
-                                                                <% for (let j = i * 4; j < i * 4 + startTimes.length; ++j) {%>
+                                                                <% for (let j = i * 4; j < timeTableData.length; ++j) {%>
                                                                 <td><%=timeTableData[j].c_id%></td>
                                                                 <%}%>
                                                                 </tr>
