@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const mailgun = require('mailgun-js');
+const ejs = require("ejs");
+const path = require("path");
+const pdf = require("html-pdf");
+const {v4: uuidv4} = require("uuid");
 const DOMAIN = process.env.DOMAIN_NAME;
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
 
@@ -87,24 +91,20 @@ exports.getDashboard = (req, res, next) => {
 exports.getProfile = async (req, res, next) => {
     const sql = 'SELECT * FROM parent WHERE p_id = ?';
     const sql2 =
-        'SELECT s_name FROM student WHERE parent_id = (SELECT parent_id FROM student WHERE s_id = ?)';
+        'SELECT s_name FROM student WHERE parent_id = ?';
 
     const profileData = await queryParamPromise(sql, [req.user]);
-    const studentName = await queryParamPromise(sql2, [req.user]);
+    const studentNames = await queryParamPromise(sql2, profileData[0].p_id);
 
     const dobs = new Date(profileData[0].dob);
-    const jd = new Date(profileData[0].joining_date);
-
+    console.log(studentNames);
     let dob =
         dobs.getDate() + '/' + (dobs.getMonth() + 1) + '/' + dobs.getFullYear();
-    let jds = jd.getDate() + '/' + (jd.getMonth() + 1) + '/' + jd.getFullYear();
 
     return res.render('Parent/profile', {
         data: profileData,
         page_name: 'profile',
-        sname: studentName[0].s_name,
-        dob,
-        jds,
+        students: studentNames
     });
 };
 
@@ -200,28 +200,104 @@ exports.postSelectAttendance = async (req, res, next) => {
     });
 };
 
+// 4.2 View Marks
+
+exports.getMarksDetails = async (req, res, next) => {
+    const results = await zeroParamPromise('SELECT s_id,s_name from student');
+    let students = [];
+    for (let i = 0; i < results.length; ++i) {
+        students.push(results[i].s_name);
+    }
+    console.log(students);
+    res.render('Parent/marks', {
+        page_name: 'marks',
+        students: students,
+    });
+};
+
+exports.viewMarks = async (req, res, next) => {
+    console.log(req.body);
+    let {student} = req.body;
+    console.log(student);
+    const sql1 = 'SELECT s_id  from student where s_name= ?';
+    const studentData = (await queryParamPromise(sql1, [student]))[0];
+    console.log(studentData.s_id);
+    const sql2 = 'SELECT test_marks, (SELECT name from course where c_id=course_id)as subject ,(SELECT c_type from course where c_id=course_id)as subject_type from marks where s_id = ?';
+    const results = (await queryParamPromise(sql2, [studentData.s_id]));
+
+    let st_marks =[];
+    for(const result of results ){
+        st_marks.push(result);
+    }
+    console.log(st_marks);
+    //res.redirect('/parent/view-marks');
+    res.render('Parent/view-marks', {
+        page_name: 'marks',
+        marks:st_marks,
+    });
+
+};
+
+
+exports.getStudent = async (req, res, next) => {
+    const results = await zeroParamPromise('SELECT s_id,s_name from student');
+    const results1 = await zeroParamPromise('SELECT c_id,name from course');
+    const results2 = await zeroParamPromise('SELECT class_id,section,semester from class');
+    const results3 = await zeroParamPromise('SELECT dept_id,d_name from department');
+
+    let students = [];
+    let courses =[];
+    let classes =[];
+    let departments=[];
+    for (let i = 0; i < results.length; ++i) {
+        students.push(results[i].s_name);
+    }
+    for (let i = 0; i < results1.length; ++i) {
+        courses.push(results1[i].name);
+    }
+    for (let i = 0; i < results2.length; ++i) {
+        classes.push(results2[i].semester);
+    }
+    for (let i = 0; i < results3.length; ++i) {
+        departments.push(results3[i].dept_id);
+    }
+
+    console.log(students);
+    res.render('Parent/select_student_timetable', {
+        page_name: 'timetable',
+        students: students,
+        courses:courses,
+        classes:classes,
+        departments:departments
+    });
+};
+
 exports.getTimeTable = async (req, res, next) => {
-    const sql1 = 'SELECT * FROM student WHERE s_id = ?';
-    const studentData = (await queryParamPromise(sql1, [req.user]))[0];
+    console.log("timetable");
+    const {student, course, semester, department} = req.body;
+    const sql1 = 'SELECT * FROM student WHERE s_name = ?';
+    const studentData = (await queryParamPromise(sql1, student))[0];
+    console.log(studentData);
     const days = (
         await queryParamPromise(
             'select datediff(current_date(), ?) as diff',
             studentData.joining_date
         )
     )[0].diff;
-    const semester = Math.floor(days / 182) + 1;
+    //const sem = Math.floor(days / 182) + 1;
     let coursesData = await queryParamPromise(
         'select c_id from course where dept_id = ? and semester = ?',
-        [studentData.dept_id, semester]
+        [department, semester]
     );
     for (let i = 0; i < coursesData.length; ++i) {
         coursesData[i] = coursesData[i].c_id;
     }
-
+    console.log(coursesData);
     let timeTableData = await queryParamPromise(
         'select * from time_table where c_id in (?) and section = ? order by day, start_time',
         [coursesData, studentData.section]
     );
+    console.log(timeTableData);
     const classesData = await queryParamPromise(
         'select c_id, st_id from class where c_id in (?) and section = ?',
         [coursesData, studentData.section]
@@ -243,8 +319,8 @@ exports.getTimeTable = async (req, res, next) => {
     const startTimes = ['10:00', '11:00', '12:00', '13:00'];
     const endTimes = ['11:00', '12:00', '13:00', '14:00'];
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    res.render('Student/timetable', {
-        page_name: 'Time Table',
+    res.render('Parent/timetable', {
+        page_name: 'timetable',
         studentData,
         semester,
         timeTableData,
@@ -291,7 +367,7 @@ exports.forgotPassword = async (req, res, next) => {
 
     console.log(token);
     const data = {
-        from: 'pulsarasandeepa123@gmail.com',
+        from: 'pulsarasandeepa123@mail.com',
         to: email,
         subject: 'Reset Password Link',
         html: `<h2>Please click on given link to reset your password</h2>
@@ -302,7 +378,8 @@ exports.forgotPassword = async (req, res, next) => {
     };
 
     console.log("data",data);
-    const sql2 = 'UPDATE parent SET resetLink = ? WHERE email = ?';
+    const sql2 = 'UPDATE parent SET res' +
+        'etLink = ? WHERE email = ?';
     db.query(sql2, [token, email], (err, success) => {
         if (err) {
             errors.push({ msg: 'Error In ResetLink' });
