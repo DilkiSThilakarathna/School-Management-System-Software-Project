@@ -14,7 +14,11 @@ router.get('/profile', requireAuth, controller.getProfile);
 router.get('/selectAttendance', requireAuth, controller.getSelectAttendance);
 router.post('/selectAttendance', requireAuth, controller.postSelectAttendance);
 
-router.get('/timetable', requireAuth, controller.getTimeTable);
+router.get('/select-student', requireAuth, controller.getStudent);
+router.post('/timetable', requireAuth, controller.getTimeTable);
+
+router.get('/marks', requireAuth, controller.getMarksDetails);
+router.post('/view-marks', requireAuth, controller.viewMarks);
 
 router.get('/logout', requireAuth, controller.getLogout);
 
