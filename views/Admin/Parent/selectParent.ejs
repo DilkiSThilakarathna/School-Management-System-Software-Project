@@ -40,29 +40,30 @@
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
                                                             <label class="form-control-label"
-                                                                for="section">Section</label>
-                                                            <input type="number" id="section" name="section"
-                                                                class="form-control form-control-alternative"
-                                                                placeholder="Section">
+                                                                   for="department">Section</label>
+                                                            <select class="form-control" id="department"
+                                                                    name="department">
+                                                                <option>
+                                                                    None
+                                                                </option>
+                                                                <% for(const department of departments) { %>
+                                                                    <option>
+                                                                        <%= department %>
+                                                                    </option>
+                                                                <% } %>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
                                                             <label class="form-control-label"
-                                                                for="department">Department</label>
-                                                            <select class="form-control" id="department"
-                                                                name="department">
-                                                                <option>
-                                                                    None
-                                                                </option>
-                                                                <% for(const department of departments) { %>
-                                                                <option>
-                                                                    <%= department %>
-                                                                </option>
-                                                                <% } %>
-                                                            </select>
+                                                                   for="section" hidden>Section</label>
+                                                            <input type="number" id="section" name="section"
+                                                                   class="form-control form-control-alternative"
+                                                                   placeholder="Section" hidden>
                                                         </div>
                                                     </div>
+
                                                 </div>
                                             </div>
                                             <hr class="my-4">

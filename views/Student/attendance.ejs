@@ -25,8 +25,13 @@
                             </div>
                             <div class="card-body">
                                 <h6 class="form-control-label mb-5"><b>NAME : </b>
-                                    <%= studentData.s_name %> || <b>SEMESTER : </b>
+                                    <%= studentData.s_name %> || <b>TERM : </b>
                                     <%= curSemester %>
+                                    <% if(curSemester == 1) {%>
+                                        <b>Jan - april</b>
+                                    <%} else {%>
+                                        <b>Aug - Dec</b>
+                                    <%}%>
                                 </h6>
                                 <div class="pl-lg-4">
                                     <div class="row">

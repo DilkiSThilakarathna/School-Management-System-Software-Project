@@ -116,6 +116,9 @@ router.get('/getReport', requireAuth, controller.getReport);
 router.get('/addReport', requireAuth, controller.getAddReport);
 router.post('/addReport', controller.postAddReport);
 
-
+// 4.2 Add notice
+router.get('/addNotice', requireAuth, controller.getAddNotice);
+router.post('/addNotice', requireAuth,  controller.postAddNotice);
+router.delete('/dashboard/delete/:id', requireAuth,controller.deleteNotice);
 
 module.exports = router;

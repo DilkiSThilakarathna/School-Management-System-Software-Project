@@ -22,37 +22,55 @@
                 <li class="<% if (page_name === 'attendance') { %>
                     active
                    <%} %>">
-                    <a href="/student/profile"><i class="fa fa-calendar-check"></i>Attendance</a>
+                    <a href="/student/selectAttendance"><i class="fa fa-calendar-check"></i>Attendance</a>
+                </li>
+                <li class="<% if (page_name === 'select_student_timetable') { %>
+                    active
+                   <%} %>">
+                    <a href="/student/select_student_timetable"><i class="fa fa-calendar"></i>TimeTable</a>
                 </li>
                 <li class="<% if (page_name === 'timetable') { %>
                     active
                    <%} %>">
-                    <a href="/student/timetable"><i class="fa fa-calendar"></i>TimeTable</a>
                 </li>
-                <li class="<% if (page_name === 'marks') { %>
+                <li class="<% if (page_name === 'viewMarks') { %>
                     active
                    <%} %>">
-                    <a href="/student/marks"><i class="fa fa-sticky-note"></i>Marks</a>
+                    <a href="/student/viewMarks"><i class="fa fa-sticky-note"></i>View Marks</a>
                 </li>
-                <li class="<% if (page_name === 'fee') { %>
+                <li class="<% if (page_name === 'viewSelectedMarks') { %>
                     active
                    <%} %>">
-                    <a href="/student/fee-history"><i class="fa fa-credit-card"></i>Fee History</a>
                 </li>
                 <li class="<% if (page_name === 'uploadAssignment') { %>
                      active
                      <%} %>">
                     <a href="/student/uploadAssignment"><i class="fa fa-upload"></i>Upload Assignments</a>
                 </li>
+                <li class="<% if (page_name === 'editSpecificAssignment') { %>
+                     active
+                     <%} %>">
+                    <a href="/student/editSpecificAssignment/:id"></a>
+                </li>
                 <li class="<% if (page_name === 'viewAssignment') { %>
                      active
                      <%} %>">
                     <a href="/student/viewAssignment"><i class="fa fa-envelope-open"></i>Assignments</a>
                 </li>
-                <hr>
-                <li>
-                    <a href="#"><i class="fa fa-cog"></i>Settings</a>
+                <li class="<% if (page_name === 'viewQuiz') { %>
+                     active
+                     <%} %>">
+                    <a href="/student/viewQuiz"><i class="fa fa-envelope"></i>View Quiz</a>
                 </li>
+                <li class="<% if (page_name === 'viewSpecificQuiz') { %>
+                     active
+                     <%} %>">
+                    <a href="/student/viewSpecificQuiz"></a>
+                </li>
+                <hr>
+<!--                <li>-->
+<!--                    <a href="#"><i class="fa fa-cog"></i>Settings</a>-->
+<!--                </li>-->
                 <li>
                     <a href="/student/logout"><i class="fa fa-sign-out-alt"></i>Logout</a>
                 </li>

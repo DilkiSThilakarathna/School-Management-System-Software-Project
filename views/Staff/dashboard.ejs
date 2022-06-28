@@ -3,16 +3,16 @@
 
         <section id="content-wrapper">
             <main role="main" class="pt-5 main">
+                <%- include('../Includes/messages') %>
                 <div class="header pb-4 pb-sm-8 pt-5 pt-lg-4 d-flex align-items-center"
                     style="max-height: 100px; background-size: cover; background-position: center top;">
                     <h1>Hello <%= user.st_name %>
                     </h1>
                 </div>
-
                 <hr>
-
                 <div class="row">
                     <div class="col-sm-4">
+
                         <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
                             <img height="250" class="card-img-top"
                                 src="http://faqs.web-school.in/wp-content/uploads/2017/05/Attendance_2-640x480.jpg"
@@ -26,7 +26,7 @@
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/admin/addStaff" class="btn btn-primary">Mark Attendance</a>
+                                    <a href="/staff/selectClassAttendance" class="btn btn-primary">Mark Attendance</a>
                                 </div>
                             </div>
                         </div>
@@ -38,17 +38,15 @@
                                 src="http://1.bp.blogspot.com/-nzm908Pfunw/VqXgeRNp4LI/AAAAAAAACJI/wgeVntLSIT8/w1200-h630-p-k-no-nu/status-report.png"
                                 alt="image">
                             <div class="card-body">
-                                <h5 class="card-title">Student Report</h5>
-                                <p class="card-text">Manage your student's report here (marks). All
-                                    your
-                                    changes will be reflected to them as well.
+                                <h5 class="card-title">Student Marks</h5>
+                                <p class="card-text">you can enter your students marks
                                 </p>
 
                             </div>
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/admin/addStaff" class="btn btn-primary">Student Report</a>
+                                    <a href="/staff/studentMarks" class="btn btn-primary">Enter Marks</a>
                                 </div>
                             </div>
                         </div>
@@ -57,9 +55,9 @@
                     <div class="col-sm-4">
                         <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
                             <img height="250" class="card-img-top"
-                                src="https://venngage-wordpress.s3.amazonaws.com/uploads/2018/10/report-design-header.png" alt="image">
+                                src="https://th.bing.com/th/id/R.91d9782083db11184ff48e5949449fe8?rik=FgeO6b5LJuw1og&riu=http%3a%2f%2fclipground.com%2fimages%2fmaster-the-art-of-clipart-1.jpg&ehk=m1RhJ1i%2fR2O2P3RPUFYFCPkIAS2pL4pkLSPUF68fyUE%3d&risl=&pid=ImgRaw&r=0" alt="image">
                             <div class="card-body">
-                                <h5 class="card-title">Generate Class Report</h5>
+                                <h5 class="card-title">Create Quiz</h5>
                                 <p class="card-text">See how well your class is performing! Generate the overall class report (Attendace/Marks) here.
                                 </p>
 
@@ -67,7 +65,7 @@
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/admin/addStaff" class="btn btn-primary">Class Report</a>
+                                    <a href="/staff/quiz" class="btn btn-primary">Make Quiz</a>
                                 </div>
                             </div>
                         </div>
@@ -110,8 +108,45 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="col-sm-4">
+                        <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
+                            <img height="250" class="card-img-top"
+                                 src="https://th.bing.com/th/id/R.741da444998d83307d8a6b3d47248af0?rik=s9piyU%2bwD%2fbVzA&pid=ImgRaw&r=0" alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">Manage Notices</h5>
+                                <p class="card-text">Manage notices here (edit/add/remove). All your changes will be
+                                    reflected in the database.
+                                </p>
 
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-wrapper text-center d-flex justify-content-between"
+                                     style="color: #fff;">
+                                    <a href="/staff/addNotice" class="btn btn-primary">Add</a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h1 class="mb-5"> Notices </h1>
+                <div class="row">
+                    <% for(notice of notices) { %>
+                        <div class="col-sm-4 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3><%= notice.title %></h3>
+                                </div>
+                                <div class="card-body">
+                                    <blockquote class="blockquote mb-0">
+                                        <p>   <%= notice.description %></p>
+                                        <footer class="blockquote-footer">By<cite title="Source Title">  <%= notice.added_by %> on <%= notice.added_date%> </cite></footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+
+                </div>
             </main>
         </section>
 

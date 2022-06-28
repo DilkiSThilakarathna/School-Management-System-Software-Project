@@ -20,25 +20,11 @@
                     <a href="/staff/profile"><i class="fa fa-id-card"></i>Profile</a>
                 </li>
 
-                <li class="<% if (page_name === 'attendance') { %>
+                <li class="<% if (page_name === 'selectClassAttendance') { %>
                      active
                     <%} %>">
-                    <a href="/staff/student-attendance"><i class="fa fa-chalkboard-teacher"></i>Mark Attendance</a>
+                    <a href="/staff/selectClassAttendance"><i class="fa fa-chalkboard-teacher"></i>Mark Attendance</a>
                 </li>
-
-
-                <li class="<% if (page_name === 'stu-report') { %>
-                     active
-                    <%} %>">
-                    <a href="/staff/student-report"><i class="fa fa-book-reader"></i>Student Report</a>
-                </li>
-
-                <li class="<% if (page_name === 'cls-report') { %>
-                     active
-                    <%} %>">
-                    <a href="/staff/class-report"><i class="fa fa-award"></i>Class Report</a>
-                </li>
-
                 <li class="<% if (page_name === 'timetable') { %>
                      active
                     <%} %>">
@@ -48,7 +34,7 @@
                 <li class="<% if (page_name === 'viewAssignment') { %>
                      active
                     <%} %>">
-                    <a href="/staff/viewAssignment"><i class="fa fa-chalkboard"></i>View Assignment</a>
+                    <a href="/staff/viewAssignment"><i class="fa fa-eye"></i>View Assignment</a>
                 </li>
 
                 <li class="<% if (page_name === 'viewSpecificAssignment') { %>
@@ -59,13 +45,23 @@
                 <li class="<% if (page_name === 'assignmentsByTeacher') { %>
                      active
                     <%} %>">
-                    <a href="/staff/assignmentsByTeacher"><<i class="fa fa-file-upload"></i> Send Assignment</a>
+                    <a href="/staff/assignmentsByTeacher"><i class="fa fa-file-upload"></i> Send Assignment</a>
+                </li>
+                <li class="<% if (page_name === 'studentMarks') { %>
+                     active
+                    <%} %>">
+                    <a href="/staff/studentMarks"><i class="fa fa-check-double"></i> Student Marks</a>
+                </li>
+                <li class="<% if (page_name === 'quiz') { %>
+                     active
+                    <%} %>">
+                    <a href="/staff/quiz"><i class="fa fa-question"></i> Quiz</a>
                 </li>
 
                 <hr>
-                <li>
-                    <a href="#"><i class="fa fa-cog"></i>Settings</a>
-                </li>
+<!--                <li>-->
+<!--                    <a href="#"><i class="fa fa-cog"></i>Settings</a>-->
+<!--                </li>-->
                 <li>
                     <a href="/staff/logout"><i class="fa fa-sign-out-alt"></i>Logout</a>
                 </li>

@@ -5,6 +5,7 @@
 
         <section id="content-wrapper">
             <main role="main" class="pt-5 main">
+                <%- include('../Includes/messages') %>
                 <div class="header pb-4 pb-sm-8 pt-5 pt-lg-4 d-flex align-items-center"
                     style="max-height: 100px; background-size: cover; background-position: center top;">
                     <h1>Hello <%= name %>
@@ -29,7 +30,7 @@
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/student/attendance" class="btn btn-primary">View Attendance</a>
+                                    <a href="/student/selectAttendance" class="btn btn-primary">View Attendance</a>
                                 </div>
                             </div>
                         </div>
@@ -45,12 +46,12 @@
                                 <p class="card-text">View the marks obtained for each of your courses. These include
                                     the
                                     marks upto your previous semester.</p>
-                                
+
                             </div>
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/student/marks" class="btn btn-primary">View Marks</a>
+                                    <a href="/student/viewMarks" class="btn btn-primary">View Marks</a>
                                 </div>
                             </div>
                         </div>
@@ -67,12 +68,12 @@
                                     courses
                                     you
                                     have registered for!)</p>
-                                
+
                             </div>
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/student/timetable" class="btn btn-primary">View Timetable</a>
+                                    <a href="/student/select_student_timetable" class="btn btn-primary">View Timetable</a>
                                 </div>
                             </div>
                         </div>
@@ -112,8 +113,44 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div class="col-sm-4">
+                        <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
+                            <img height="250" class="card-img-top"
+                                 src="https://2o9ub0417chl2lg6m43em6psi2i-wpengine.netdna-ssl.com/wp-content/uploads/2018/10/shutterstock_1115891669-1024x611.jpg"
+                                 alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">View My Quiz.</h5>
+                                <p class="card-text">Quizzes that I have to do.</p>
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-wrapper text-center d-flex justify-content-between"
+                                     style="color: #fff;">
+                                    <a href="/student/viewQuiz" class="btn btn-primary">View Quiz</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <h1 class="mb-5"> Notices </h1>
+                <div class="row">
+                    <% for(notice of notices) { %>
+                        <div class="col-sm-4 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3><%= notice.title %></h3>
+                                </div>
+                                <div class="card-body">
+                                    <blockquote class="blockquote mb-0">
+                                        <p>   <%= notice.description %></p>
+                                        <footer class="blockquote-footer">By<cite title="Source Title">  <%= notice.added_by %> on <%= notice.added_date%> </cite></footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
             </main>
         </section>
 

@@ -7,6 +7,7 @@ let ejs = require("ejs");
 let pdf = require("html-pdf");
 let path = require("path");
 const fs = require("fs");
+const {static} = require("express");
 const DOMAIN = process.env.DOMAIN_NAME;
 const mg = mailgun({apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN});
 
@@ -116,7 +117,9 @@ exports.postRegister = async (req, res, next) => {
 exports.getDashboard = async (req, res, next) => {
     const sql = 'SELECT * FROM admin WHERE admin_id = ?';
     const user = (await queryParamPromise(sql, [req.user]))[0];
-    res.render('Admin/dashboard', {user: user, page_name: 'overview'});
+    const notices = await zeroParamPromise('SELECT * FROM notice');
+
+    res.render('Admin/dashboard', {user: user, notices:notices, page_name: 'overview'});
 };
 
 // 1.4 Logout
@@ -177,7 +180,7 @@ exports.forgotPassword = async (req, res, next) => {
     );
 
     const data = {
-        from: 'pulsarasandeepa123@gmail.com',
+        from: 'school.management@gmail.com',
         to: email,
         subject: 'Reset Password Link',
         html: `<h2>Please click on given link to reset your password</h2>
@@ -731,7 +734,7 @@ exports.getAddClass = async (req, res, next) => {
 };
 
 exports.postAddClass = async (req, res, next) => {
-    let {course, staff, section} = req.body;
+    let {course, staff,section} = req.body;
     console.log(req.body);
     staff = staff.split(' ')[0];
     const sql1 = 'SELECT st_id, dept_id from staff where email = ?';
@@ -740,14 +743,6 @@ exports.postAddClass = async (req, res, next) => {
     const courseData = (await queryParamPromise(sql2, [course]))[0];
     if (staffData.dept_id !== courseData.dept_id) {
         req.flash('error', 'The staff and course are of different department');
-        return res.redirect('/admin/addClass');
-    }
-    const sql3 =
-        'select max(section) as `max_section` from student where dept_id = ?';
-    const max_section = (await queryParamPromise(sql3, [staffData.dept_id]))[0]
-        .max_section;
-    if (section <= 0 || section > max_section) {
-        req.flash('error', 'The section for the given department does not exist');
         return res.redirect('/admin/addClass');
     }
     const sql4 = 'INSERT INTO class set ?';
@@ -1034,9 +1029,9 @@ exports.postRelevantParent = async (req, res, next) => {
             const sql2 = 'select c_id from course where dept_id = ?';
             let course_ids = await queryParamPromise(sql2, [department]);
             if (course_ids.length === 0) {
-                return res.render('Admin/Staff/getStaff', {
+                return res.render('Admin/Parent/getParent', {
                     data: [],
-                    page_name: 'staff',
+                    page_name: 'parent',
                 });
             }
             const courses = [];
@@ -1046,9 +1041,9 @@ exports.postRelevantParent = async (req, res, next) => {
             const sql3 = 'select st_id from class where section = ? and c_id in (?)';
             const staff_ids = await queryParamPromise(sql3, [section, courses]);
             if (staff_ids.length === 0) {
-                return res.render('Admin/Staff/getStaff', {
+                return res.render('Admin/Parent/getParent', {
                     data: [],
-                    page_name: 'staff',
+                    page_name: 'parent',
                 });
             }
             const staffs = [];
@@ -1057,25 +1052,25 @@ exports.postRelevantParent = async (req, res, next) => {
             }
             const sql4 = 'select * from staff where st_id in (?)';
             const results = await queryParamPromise(sql4, [staffs]);
-            return res.render('Admin/Staff/getStaff', {
+            return res.render('Admin/Parent/getParent', {
                 data: results,
-                page_name: 'staff',
+                page_name: 'parent',
             });
         } else {
             // section for the given department does not exist
             req.flash('error', 'Section for the given department does not exist');
-            res.redirect('/admin/getStaff');
+            res.redirect('/admin/getParent');
         }
     } else if (department !== 'None') {
         // All teachers from particular department
         const sql = 'select * from staff where dept_id = ?';
         const results = await queryParamPromise(sql, [department]);
-        return res.render('Admin/Staff/getStaff', {
+        return res.render('Admin/Parent/getParent', {
             data: results,
-            page_name: 'staff',
+            page_name: 'parent',
         });
     } else {
-        return res.redirect('/admin/getAllStaffs');
+        return res.redirect('/admin/getAllParents');
     }
 };
 
@@ -1089,17 +1084,17 @@ exports.getAllParent = async (req, res, next) => {
 // 7.4 Modify existing parents
 exports.getParentSettings = async (req, res, next) => {
     const staffEmail = req.params.id;
-    const sql1 = 'SELECT * FROM staff WHERE email = ?';
+    const sql1 = 'SELECT * FROM parent WHERE email = ?';
     const parentData = await queryParamPromise(sql1, [staffEmail]);
-    const address = staffData[0].p_address.split('-');
+    const address = parentData[0].p_address.split('-');
     parentData[0].address = address;
     const results = await zeroParamPromise('SELECT * from department');
     let departments = [];
     for (let i = 0; i < results.length; ++i) {
         departments.push(results[i].dept_id);
     }
-    res.render('Admin/Staff/setStaff', {
-        staffData: parentData,
+    res.render('Admin/Parent/setParent', {
+        parentData: parentData,
         departments: departments,
         page_name: 'Parent Settings',
     });
@@ -1176,8 +1171,7 @@ exports.getAddReport = async (req, res, next) => {
 
 exports.postAddReport = async (req, res, next) => {
     let {student} = req.body;
-    console.log(student);
-    const sql1 = 'SELECT s_id  from student where s_name= ?';
+    const sql1 = 'SELECT s_id, email  from student where s_name= ?';
     const studentData = (await queryParamPromise(sql1, [student]))[0];
     console.log(studentData.s_id);
     const sql2 = 'SELECT test_marks, (SELECT name from course where c_id=course_id)as subject ,(SELECT c_type from course where c_id=course_id)as subject_type from marks where s_id = ?';
@@ -1205,7 +1199,7 @@ exports.postAddReport = async (req, res, next) => {
                     "height": "20mm",
                 },
             };
-            pdf.create(data, options).toFile(`public/Reports/${student}${uuidv4()}.pdf`, function (err, data) {
+            pdf.create(data, options).toFile(`public/Reports/${student}${"-"}${studentData.email}.pdf`, function (err, data) {
                 if (err) {
                     console.log(err);
 
@@ -1220,3 +1214,35 @@ exports.postAddReport = async (req, res, next) => {
     });
 };
 
+// 6.3 Add Notice
+exports.getAddNotice = async (req, res, next) => {
+    res.render('Admin/Notice/addNotice', {
+        page_name: 'notices',
+    });
+};
+exports.postAddNotice = async (req, res, next) => {
+    let {title, description} = req.body;
+    let currentDate = new Date().toJSON().slice(0, 10);
+    const sql ='SELECT name from admin WHERE admin_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    console.log(user);
+    const sql2 = 'INSERT INTO notice SET ?';
+    await queryParamPromise(sql2, {
+        n_id:uuidv4(),
+        title:title,
+        description:description,
+        added_by:user.name,
+        added_date:currentDate,
+    });
+    req.flash('success_msg', 'Notice added successfully');
+    return res.redirect('/admin/dashboard');
+};
+
+exports.deleteNotice = async (req, res, next) => {
+    let notice_id= req.params.id;
+    console.log(notice_id);
+    const sql2 = 'DELETE FROM notice WHERE n_id=?';
+    await queryParamPromise(sql2, notice_id);
+    req.flash('success_msg', 'Notice deleted successfully');
+    res.json({redirect:'/admin/dashboard'});
+};

@@ -36,6 +36,20 @@ router.post('/uploadAssignment', requireAuth, controller.postAssignmentUpload);
 router.get('/viewAssignment', requireAuth, controller.viewAssignment);
 
 router.get('/viewSpecificAssignment/:name', requireAuth, controller.getSpecificAssignment);
-// router.get('/uploads', generatePdf);
+router.get('/viewTodoAssignment/:name', requireAuth, controller.getTodoAssignment);
 
+router.get('/editSpecificAssignment/:id', requireAuth, controller.getEditSpecificAssignment);
+router.post('/editSpecificAssignment', requireAuth, controller.putEditSpecificAssignment);
+
+//view Assignment marks
+router.get('/viewMarks', requireAuth, controller.getAssignmentMarks);
+router.post('/viewMarks', requireAuth, controller.postAssignmentMarks);
+
+router.get('/select_student_timetable', requireAuth, controller.getStudent);
+router.post('/timetable', requireAuth, controller.getTimeTable);
+
+router.get('/viewQuiz', requireAuth, controller.viewQuiz);
+router.get('/viewSpecificQuiz/:id', requireAuth, controller.getSpecificQuiz);
+
+router.post('/viewSpecificQuiz', requireAuth, controller.postViewSpecificQuiz);
 module.exports = router;

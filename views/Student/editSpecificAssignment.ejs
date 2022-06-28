@@ -1,0 +1,52 @@
+<%- include('../Includes/begin.ejs') %>
+<section id="content-wrapper">
+
+    <main role="main" class="pt-5 main">
+        <div class="main-content">
+            <div class="header pb-4 pb-sm-8 pt-5 pt-lg-8 d-flex align-items-center"
+                 style="height: 100px; background-size: cover; background-position: center top;">
+
+            </div>
+            <div class="container-fluid mt--7">
+                <div class="row">
+                    <form name="editSpecificAssignment" action="/Student/editSpecificAssignment" enctype="multipart/form-data" method="POST" style="margin-left: auto;margin-right: auto">
+                        <div class="form-group">
+                            <h1><b>Resubmit Assignment and Home Works</b></h1>
+                        </div>
+                        <div class="form-group">
+                            <label>Choose your subject</label>
+                            <select class="form-control" id="subjectName" name="subjectName"
+                                    required>
+                                <% for(const subjectName of subjectNames) { %>
+                                    <option><%= subjectName.name%></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Resubmit Upload your Assignment</label>
+                            <input id ="fileName" type="file" accept="application/pdf" onChange ="validateFileType()" name="myFile" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-primary">
+                        </div>
+                    </form>
+                    <script type="text/javascript">
+                        function validateFileType(){
+                            console.log("err");
+                            var fileName = document.getElementById("fileName").value;
+                            console.log(fileName);
+                            var idxDot = fileName.lastIndexOf(".") + 1;
+                            var extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+                            if (extFile!="pdf"){
+                                alert("Only pdf files are allowed!");
+                                window.location.href = "/student/uploadAssignment";
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </main>
+</section>
+
+<%- include('../Includes/student_end.ejs') %>

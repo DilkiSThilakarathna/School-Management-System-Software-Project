@@ -17,7 +17,7 @@
                             <div class="card-header bg-white border-0">
                                 <div class="row align-items-center">
                                     <div class="col-8">
-                                        <h3 class="mb-0" style="color: brown;">Assignments you have to done</h3>
+                                        <h3 class="mb-0" style="color: brown;">Assignments you have to do</h3>
                                     </div>
                                 </div>
                             </div>
@@ -34,9 +34,9 @@
                                         <tbody id="courseTable">
                                         <% for(var i=0; i < uploadFileNames.length; i++) { %>
                                             <tr>
-                                                <th scope="row"><%= i %></th>
+                                                <th scope="row"><%= i +1%></th>
                                                 <td><%= uploadFileNames[i] %></td>
-                                                <td><a href="/student/viewSpecificAssignment/<%= uploadFileNames[i] %>" class="btn btn-sm btn-primary">View</a></td>
+                                                <td><a href="/student/viewTodoAssignment/<%= uploadFileNames[i] %>" class="btn btn-sm btn-primary">View</a></td>
                                             </tr>
                                         <% } %>
                                         </tbody>

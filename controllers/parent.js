@@ -7,6 +7,8 @@ const ejs = require("ejs");
 const path = require("path");
 const pdf = require("html-pdf");
 const {v4: uuidv4} = require("uuid");
+
+
 const DOMAIN = process.env.DOMAIN_NAME;
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
 
@@ -77,12 +79,14 @@ exports.postLogin = (req, res, next) => {
     }
 };
 
-exports.getDashboard = (req, res, next) => {
+exports.getDashboard = async (req, res, next) => {
     let sql6 = 'SELECT * FROM parent WHERE p_id = ?';
+    const notices = await zeroParamPromise('SELECT * FROM notice');
     db.query(sql6, [req.user], (err, result) => {
         if (err) throw err;
         res.render('Parent/dashboard', {
             name: result[0].p_name,
+            notices:notices,
             page_name: 'overview',
         });
     });
@@ -109,9 +113,11 @@ exports.getProfile = async (req, res, next) => {
 };
 
 exports.getSelectAttendance = async (req, res, next) => {
+    const sql1 = 'SELECT s_name from student';
+    const studentData = (await queryParamPromise(sql1));
     res.render('Parent/selectAttendance', {
         page_name: 'attendance',
-        curYear: 2021,
+        studentData: studentData,
     });
 };
 
@@ -147,7 +153,10 @@ const getAttendanceData = async (year, months, courseData, s_id) => {
                 (dayNumber <= 9 ? '0' + dayNumber : dayNumber);
             const sql3 =
                 'SELECT status from attendance WHERE c_id = ? AND s_id = ? AND date = ?';
-            for (course of courseData) {
+                console.log("####",sql3)
+                
+                for (course of courseData) {
+                console.log("####",course.c_id, s_id, sqlDate)
                 const attendanceData = (
                     await queryParamPromise(sql3, [course.c_id, s_id, sqlDate])
                 )[0];
@@ -166,28 +175,28 @@ const getAttendanceData = async (year, months, courseData, s_id) => {
 };
 
 exports.postSelectAttendance = async (req, res, next) => {
-    const { year, semester } = req.body;
-    const sql1 = 'SELECT * FROM student WHERE s_id = ?';
-    const studentData = (await queryParamPromise(sql1, [req.user]))[0];
+    const { name, semester,year } = req.body;
+    const sql1 = 'SELECT * FROM student WHERE s_name = ?';
+    const studentData = (await queryParamPromise(sql1, name))[0];
     const sql2 = 'SELECT * from course WHERE dept_id = ? AND semester = ?';
     const courseData = await queryParamPromise(sql2, [
         studentData.dept_id,
         semester,
     ]);
     var monthDates, isPresent;
-    if (semester % 2 === 0) {
+    if (semester % 2 === 1) {
         [monthDates, isPresent] = await getAttendanceData(
             parseInt(year),
             [0, 1, 2, 3],
             courseData,
-            req.user
+            studentData.s_id
         );
     } else {
         [monthDates, isPresent] = await getAttendanceData(
             parseInt(year),
             [7, 8, 9, 10],
             courseData,
-            req.user
+            studentData.s_id
         );
     }
     res.render('Parent/attendance', {
@@ -367,7 +376,7 @@ exports.forgotPassword = async (req, res, next) => {
 
     console.log(token);
     const data = {
-        from: 'pulsarasandeepa123@mail.com',
+        from: 'school.management@mail.com',
         to: email,
         subject: 'Reset Password Link',
         html: `<h2>Please click on given link to reset your password</h2>
@@ -447,4 +456,141 @@ exports.resetPassword = (req, res, next) => {
             res.render('Parent/resetPassword', { errors });
         }
     }
+};
+const secretKey = 'sk_test_51LEUkzHB6ffVsuqAMgC1dOxGYGFqAel56X2TlmXpEmHpjJ4b8NdSL0YSBg8rm0RHndFU6fsIQyHT61buiDXbGy4F00r5WXytMl';
+const publishableKey = 'pk_test_51LEUkzHB6ffVsuqATR6ecWYz4YVCe5nJv4Xplzuv8pMSmiZJr1wQ46lokDRLaL3fVb89aoquOa0AlkB3UmMiHnrm001YFrP4AM';
+const stripe = require('stripe')(secretKey);
+
+exports.getDonate = async (req, res, next) => {
+    const sql ='SELECT p_name from parent WHERE p_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    const amount = 500*100;
+        console.log(user);
+        res.render('Parent/paymentComponent', {
+            page_name: 'donate',
+            key: publishableKey,
+            parent_name:user.p_name,
+            amount: amount
+        });
+    };
+
+exports.postDonate = async (req, res, next) => {
+    const {name, email, amount, contact} = req.body;
+    const sql ='SELECT p_name from parent WHERE p_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    const payAmount = 500*100;
+    let currentDate = new Date().toJSON().slice(0, 10);
+    stripe.customers.create({
+        email: req.body.stripeEmail,
+        source: req.body.stripeToken,
+        name: user.p_name,
+    })
+        .then((customer) => {
+            return stripe.charges.create({
+                amount: payAmount,
+                description: 'Donate to School Facilities',
+                currency: 'LKR',
+                customer: customer.id
+            });
+        })
+        .then(async (charge) => {
+            const sql2 = 'INSERT INTO payment SET ?';
+            await queryParamPromise(sql2, {
+                payment_id: uuidv4(),
+                name: user.p_name,
+                email: email,
+                amount:payAmount/100,
+                payment_date: currentDate,
+            });
+            req.flash('success_msg', 'Thank you for your Donation!');
+            res.redirect('/parent/donate');
+            // payment component
+        })
+        .catch((err) => {
+            console.log(err);
+            req.flash('error_msg', 'Something Went Wrong!');
+            res.redirect('/parent/donate');
+        });
+};
+
+exports.getDonateHistory = async (req, res, next) => {
+    const sql ='SELECT p_name from parent WHERE p_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    const sql1 = 'SELECT * FROM payment WHERE name =?';
+    const results =  await queryParamPromise(sql1, user.p_name);
+    console.log(results)
+    for (let i = 0; i < results.length; i++) {
+       console.log(results[i]);
+    }
+    res.render('Parent/viewDonateHistory', {
+        page_name: 'viewDonateHistory',
+        results:results,
+    });
+}
+
+
+// 4.2 Student fees payment
+
+exports.getStudentDetails = async (req, res, next) => {
+    const results = await zeroParamPromise('SELECT s_id,s_name from student');
+    let students = [];
+    for (let i = 0; i < results.length; ++i) {
+        students.push(results[i].s_name);
+    }
+    const sql ='SELECT p_name from parent WHERE p_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    const amount = 20000*100;
+    console.log(user);
+    console.log(students);
+    res.render('Parent/pay-student-fees', {
+        page_name: 'student-fees',
+        students: students,
+        key: publishableKey,
+        parent_name:user.p_name,
+        amount: amount
+    });
+};
+
+
+exports.postStudentFees = async (req, res, next) => {
+    const {student,year} = req.body;
+    const sql ='SELECT p_name from parent WHERE p_id=?';
+    const user = (await queryParamPromise(sql, [req.user]))[0];
+    const payAmount = 20000*100;
+    let currentDate = new Date().toJSON().slice(0, 10);
+    const sql2 ='SELECT s_id from student WHERE s_name=?';
+    const id = (await queryParamPromise(sql2, student))[0];
+    stripe.customers.create({
+        email: req.body.stripeEmail,
+        source: req.body.stripeToken,
+        name: user.p_name,
+    })
+        .then((customer) => {
+            return stripe.charges.create({
+                amount: payAmount,
+                description: 'Donate to School Facilities',
+                currency: 'LKR',
+                customer: customer.id
+            });
+        })
+        .then(async (charge) => {
+            const sql2 = 'INSERT INTO payment SET ?';
+            await queryParamPromise(sql2, {
+                payment_id: uuidv4(),
+                name: user.p_name,
+                email: req.body.stripeEmail,
+                amount:payAmount/100,
+                payment_date: currentDate,
+                s_name: student,
+                year:year,
+                s_id: id.s_id
+            });
+            req.flash('success_msg', 'Thank you for your Payment!');
+            res.redirect('/parent/pay-student-fees');
+        })
+        .catch((err) => {
+            console.log(err);
+            req.flash('error_msg', 'Something Went Wrong!');
+            res.redirect('/parent/pay-student-fees');
+        });
 };

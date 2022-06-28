@@ -23,36 +23,36 @@
                                     <div class="card-header bg-white border-0">
                                         <div class="row align-items-center">
                                             <div class="col-8">
-                                                <h3 class="mb-0" style="color: brown;">ADD NEW DEPARTMENT</h3>
+                                                <h3 class="mb-0" style="color: brown;">ADD NEW SECTION</h3>
                                             </div>
                                             <div class="col-4 text-right">
-                                                <a href="/admin/getDept" class="btn btn-sm btn-primary">See All Departments</a>
+                                                <a href="/admin/getDept" class="btn btn-sm btn-primary">See All Sections</a>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="card-body">
                                         <%- include('../../Includes/messages') %>
                                         <form action="/admin/addDept" method="POST">
-                                            <h6 class="heading-small text-muted mb-4">Department Information</h6>
+                                            <h6 class="heading-small text-muted mb-4">Section Information</h6>
                                             <div class="pl-lg-4">
                                                 <div class="row">
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
                                                             <label class="form-control-label"
-                                                                for="department">Department</label>
+                                                                for="department">Section</label>
                                                             <input type="text" id="department" name="department"
                                                                 class="form-control form-control-alternative"
-                                                                placeholder="Department Name">
+                                                                placeholder="Section Name">
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <div class="form-group">
-                                                            <label class="form-control-label" for="deptId">Department
+                                                            <label class="form-control-label" for="deptId">Section
                                                                 Short Name <span style="font-size: x-small;">(make sure
                                                                     to have a unique name!)</span></label>
                                                             <input type="text" id="deptId" name="deptId"
                                                                 class="form-control form-control-alternative"
-                                                                placeholder="Department Short Name">
+                                                                placeholder="Section Short Name">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -60,7 +60,7 @@
                                             </div>
                                             <hr class="my-4">
                                             <button type="submit" class="btn btn-primary btn-block">ADD
-                                                DEPARTMENT</button>
+                                                SECTION</button>
                                         </form>
 
 

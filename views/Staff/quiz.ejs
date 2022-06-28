@@ -1,0 +1,74 @@
+<%- include('../Includes/begin.ejs') %>
+<%- include('../Includes/staff_nav.ejs') %>
+<section id="content-wrapper">
+    <main role="main" class="pt-5 main">
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header pb-4 pb-sm-8 pt-5 pt-lg-8 d-flex align-items-center"
+                 style="height: 100px; background-size: cover; background-position: center top;">
+                <!-- Header container -->
+            </div>
+            <!-- Page content -->
+            <div class="container-fluid mt--7">
+                <div class="row">
+                    <div class="col-xl-12 order-xl-1">
+                        <div class="card bg-secondary shadow">
+                            <div class="card-header bg-white border-0">
+                                <div class="row align-items-center">
+                                    <div class="col-8">
+                                        <h3 class="mb-0">Create a Quiz</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="form-control-label mb-5"><b>Quiz Details </b></h6>
+                                <div class="pl-lg-4">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group focused">
+                                                <form action="/staff/quiz" method="POST">
+                                                    <div class="row">
+                                                        <div class="col-lg-12">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label" for="testName">Enter the Quiz Name</label>
+                                                                <input type="text" id="testName" name="testName"
+                                                                       class="form-control form-control-alternative" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label" for="subjectName">Select subject Name</label>
+                                                                <select class="form-control" id="subjectName" name="subjectName"
+                                                                        required>
+                                                                    <% for(const subject of subjectList) { %>
+                                                                        <option><%= subject.name %></option>
+                                                                    <% } %>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label" for="status">How many Question Do you want to add ?</label>
+                                                                <input type="text" id="noQuiz" name="noQuiz"
+                                                                       class="form-control form-control-alternative">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-block"> Create A Quiz</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </main>
+</section>
+
+<%- include('../Includes/staff_end.ejs') %>

@@ -12,18 +12,15 @@ router.get('/dashboard', requireAuth, controller.getDashboard);
 router.get('/profile', requireAuth, controller.getProfile);
 router.get('/logout', requireAuth, controller.getLogout);
 
-router.get('/student-attendance', requireAuth, controller.getAttendance);
-// router.get('/student-attendance/class/:id', requireAuth, controller.markAttendance);
+router.get('/selectClassAttendance', requireAuth, controller.getMarkAttendance);
+router.post('/selectClassAttendance', requireAuth, controller.postMarkAttendance);
 
-router.post(
-  '/student-attendance/class/:id',
-  requireAuth,
-  controller.postAttendance
-);
+router.get('/studentMarks', requireAuth, controller.getAssignmentMarks);
+router.post('/studentMarks', requireAuth, controller.postAssignmentMarks);
 
 router.get('/timetable', requireAuth, controller.getTimeTable);
 
-router.post('/student-attendance', requireAuth, controller.markAttendance);
+// router.post('/attendance', requireAuth, controller.markAttendance);
 
 router.get('/student-report', requireAuth, controller.getStudentReport);
 
@@ -44,8 +41,21 @@ router.post('/viewAssignment', requireAuth, controller.postViewAssignment);
 
 //view submited assignment
 router.get('/viewSpecificAssignment/:name', requireAuth, controller.getSpecificAssignment);
+router.get('/viewSpecificAssignment/:name', requireAuth, controller.getSpecificAssignmentFile);
 
 // see the assignments by teacher
 router.post('/assignmentsByTeacher', requireAuth, controller.postAssignmentUploadByTeacher);
 router.get('/assignmentsByTeacher', requireAuth, controller.getAssignmentUploadByTeacher);
+
+// 4.2 Add notice
+router.get('/addNotice', requireAuth, controller.getAddNotice);
+router.post('/addNotice', requireAuth,  controller.postAddNotice);
+
+router.get('/quiz', requireAuth, controller.getQuiz);
+router.post('/quiz', requireAuth, controller.postQuizDetails);
+
+
+router.get('/createQuiz', requireAuth, controller.getCreateQuiz);
+router.post('/createQuiz', requireAuth, controller.postCreateQuiz);
+
 module.exports = router;

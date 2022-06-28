@@ -14,7 +14,26 @@
                 <hr>
 
                 <div class="row">
+                    <div class="col-sm-4">
+                        <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
+                            <img height="250" class="card-img-top"
+                                 src="https://img.freepik.com/free-vector/flat-design-illustration-customer-support_23-2148887720.jpg?t=st=1656134475~exp=1656135075~hmac=27a6bbf9c85d436fd34820514f0c5d7010c1caae8eeade8677a6ffcb9507422d&w=826"
+                                 alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">Attendance</h5>
+                                <p class="card-text">View the attendance status for each of your courses. (Make sure
+                                    that
+                                    the atted. is atleast 75%) </p>
 
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-wrapper text-center d-flex justify-content-between"
+                                     style="color: #fff;">
+                                    <a href="/parent/selectAttendance" class="btn btn-primary">View Attendance</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-sm-4">
                         <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
                             <img height="250" class="card-img-top"
@@ -52,13 +71,71 @@
                             <div class="card-footer">
                                 <div class="btn-wrapper text-center d-flex justify-content-between"
                                     style="color: #fff;">
-                                    <a href="/parent/timetable" class="btn btn-primary">View Timetable</a>
+                                    <a href="/parent/select_student_timetable" class="btn btn-primary">View Timetable</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div class="col-sm-4">
+                        <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
+                            <img height="250" class="card-img-top"
+                                 src="https://img.freepik.com/free-vector/illustration-donation-money_4968-1284.jpg?w=1380"
+                                 alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">Donate to School</h5>
+                                <p class="card-text"> Teachers and students need your support more than ever. Get crayons, books, cleaning supplies, technology, and more to help students get back to learning.</p>
+
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-wrapper text-center d-flex justify-content-between"
+                                     style="color: #fff;">
+                                    <a href="/parent/donate" class="btn btn-primary">Donate</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="card mb-5" style="box-shadow: 0 1rem 2rem 0 rgba(136, 152, 170, .15) !important;">
+                            <img height="250" class="card-img-top"
+                                 src="https://img.freepik.com/free-vector/intellectual-property-creative-idea-monetization-author-rights-protection-invention-patent-registration-profitable-startup-license-fees-payment_335657-2692.jpg?t=st=1656134425~exp=1656135025~hmac=230d4b6f6268ce20926f48e5d27a55ee6119f20eb1c36395e1600907765051a6&w=826"
+                                 alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">Pay Student Fees</h5>
+                                <p class="card-text"> Student fees for the year can be paid by here</p>
+
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-wrapper text-center d-flex justify-content-between"
+                                     style="color: #fff;">
+                                    <a href="/parent/pay-student-fees" class="btn btn-primary">Pay Student Fees</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <hr>
+                <h1 class="mb-5"> Notices </h1>
+                <div class="row">
+                    <% for(notice of notices) { %>
+                        <div class="col-sm-4 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3><%= notice.title %></h3>
+                                </div>
+                                <div class="card-body">
+                                    <blockquote class="blockquote mb-0">
+                                        <p>   <%= notice.description %></p>
+                                        <footer class="blockquote-footer">By<cite title="Source Title">  <%= notice.added_by %> on <%= notice.added_date%> </cite></footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+
+                </div>
             </main>
         </section>
 

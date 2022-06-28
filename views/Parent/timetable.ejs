@@ -25,7 +25,7 @@
                             </div>
                             <div class="card-body">
                                 <h6 class="form-control-label mb-5"><b>NAME : </b>
-                                    <%= studentData.s_name %> || <b>SEMESTER : </b>
+                                    <%= studentData.s_name %> || <b>TERM : </b>
                                     <%= semester %>
                                 </h6>
                                 <div class="pl-lg-4">
@@ -35,24 +35,49 @@
                                                 <div class="table-responsive" style="overflow-x: hidden;">
                                                     <table class="table table-striped">
                                                         <thead class="thead-dark">
-                                                            <tr>
-                                                                <th scope="col"></th>
-                                                                <% for (let i = 0; i < startTimes.length; ++i) {%>
-                                                                <th scope="col"><%=startTimes[i]%> - <%=endTimes[i]%>
-                                                                </th>
-                                                                <%}%>
-                                                            </tr>
+                                                        <tr>
+                                                            <th scope="col"></th>
+                                                            <% for (let i = 0; i < startTimes.length; ++i) {%>
+                                                            <th scope="col"><%=startTimes[i]%> - <%=endTimes[i]%>
+                                                            </th>
+                                                            <%}%>
+                                                        </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <% for (let i = 0; i < dayNames.length; ++i) {%>
-                                                            <tr>
-                                                                <th><%=dayNames[i]%></th>
-                                                                <% for (let j = i * 4; j < timeTableData.length; ++j) {%>
-                                                                <td><%=timeTableData[j].c_id%></td>
+                                                        <% for (let i = 0; i < dayNames.length; ++i) {%>
+                                                        <tr>
+                                                            <th><%=dayNames[i]%></th>
+                                                            <% for (let j=0; j< timeTableData.length;++j) {%>
+                                                                <% if(timeTableData[j].start_time === "10:00:00") {%>
+                                                                    <% if(timeTableData[j].day === i) {%>
+                                                                    <td><%=timeTableData[j].c_id%></td>
+                                                                    <%}%>
                                                                 <%}%>
-                                                                </tr>
+                                                                <% if(timeTableData[j].start_time === "11:00:00") {%>
+                                                                    <% if(timeTableData[j].day === i) {%>
+                                                                    <td></td>
+                                                                    <td><%=timeTableData[j].c_id%></td>
+                                                                    <%}%>
+                                                                <%}%>
+                                                                <% if(timeTableData[j].start_time === "12:00:00") {%>
+                                                                    <% if(timeTableData[j].day === i) {%>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td><%=timeTableData[j].c_id%></td>
+                                                                    <%}%>
+                                                                <%}%>
+                                                                <% if(timeTableData[j].start_time === "13:00:00") {%>
+                                                                    <% if(timeTableData[j].day === i) {%>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td><%=timeTableData[j].c_id%></td>
+                                                                    <%}%>
+                                                                <%}%>
                                                             <%}%>
-                                                                </tbody>
+                                                        </tr>
+                                                        <%}%>
+                                                        </tbody>
                                                     </table>
                                                 </div>
                                             </div>

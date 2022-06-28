@@ -14,7 +14,7 @@ router.get('/profile', requireAuth, controller.getProfile);
 router.get('/selectAttendance', requireAuth, controller.getSelectAttendance);
 router.post('/selectAttendance', requireAuth, controller.postSelectAttendance);
 
-router.get('/select-student', requireAuth, controller.getStudent);
+router.get('/select_student_timetable', requireAuth, controller.getStudent);
 router.post('/timetable', requireAuth, controller.getTimeTable);
 
 router.get('/marks', requireAuth, controller.getMarksDetails);
@@ -30,4 +30,10 @@ router.put('/forgot-password', controller.forgotPassword);
 router.get('/resetpassword/:id', forwardAuth, controller.getResetPassword);
 router.put('/resetpassword', controller.resetPassword);
 
+router.get('/donate', requireAuth, controller.getDonate);
+router.post('/donate', requireAuth, controller.postDonate);
+router.get('/viewDonateHistory', requireAuth, controller.getDonateHistory);
+
+router.get('/pay-student-fees', requireAuth, controller.getStudentDetails);
+router.post('/pay-student-fees', requireAuth, controller.postStudentFees);
 module.exports = router;

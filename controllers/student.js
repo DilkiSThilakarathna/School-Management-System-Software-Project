@@ -15,6 +15,7 @@ const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: DOMAIN });
 let uploadFile;
 
 
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -83,12 +84,14 @@ exports.postLogin = (req, res, next) => {
   }
 };
 
-exports.getDashboard = (req, res, next) => {
+exports.getDashboard =async (req, res, next) => {
   let sql6 = 'SELECT * FROM student WHERE s_id = ?';
+  const notices = await zeroParamPromise('SELECT * FROM notice');
   db.query(sql6, [req.user], (err, result) => {
     if (err) throw err;
     res.render('Student/dashboard', {
       name: result[0].s_name,
+      notices:notices,
       page_name: 'overview',
     });
   });
@@ -119,9 +122,12 @@ exports.getProfile = async (req, res, next) => {
 };
 
 exports.getSelectAttendance = async (req, res, next) => {
+
+  const sql1 = 'SELECT s_name from student';
+  const studentData = (await queryParamPromise(sql1));
   res.render('Student/selectAttendance', {
     page_name: 'attendance',
-    curYear: 2021,
+    studentData: studentData,
   });
 };
 
@@ -176,16 +182,16 @@ const getAttendanceData = async (year, months, courseData, s_id) => {
 };
 
 exports.postSelectAttendance = async (req, res, next) => {
-  const { year, semester } = req.body;
-  const sql1 = 'SELECT * FROM student WHERE s_id = ?';
-  const studentData = (await queryParamPromise(sql1, [req.user]))[0];
+  const { name,semester ,year} = req.body;
+  const sql1 = 'SELECT * FROM student WHERE s_name = ?';
+  const studentData = (await queryParamPromise(sql1, name))[0];
   const sql2 = 'SELECT * from course WHERE dept_id = ? AND semester = ?';
   const courseData = await queryParamPromise(sql2, [
     studentData.dept_id,
     semester,
   ]);
   var monthDates, isPresent;
-  if (semester % 2 === 0) {
+  if (semester % 2 === 1) {
     [monthDates, isPresent] = await getAttendanceData(
       parseInt(year),
       [0, 1, 2, 3],
@@ -210,51 +216,88 @@ exports.postSelectAttendance = async (req, res, next) => {
   });
 };
 
+exports.getStudent = async (req, res, next) => {
+  const results = await zeroParamPromise('SELECT s_id,s_name from student');
+  const results1 = await zeroParamPromise('SELECT c_id,name from course');
+  const results2 = await zeroParamPromise('SELECT class_id,section,semester from class');
+  const results3 = await zeroParamPromise('SELECT dept_id,d_name from department');
+
+  let students = [];
+  let courses =[];
+  let classes =[];
+  let departments=[];
+  for (let i = 0; i < results.length; ++i) {
+    students.push(results[i].s_name);
+  }
+  for (let i = 0; i < results1.length; ++i) {
+    courses.push(results1[i].name);
+  }
+  for (let i = 0; i < results2.length; ++i) {
+    classes.push(results2[i].semester);
+  }
+  for (let i = 0; i < results3.length; ++i) {
+    departments.push(results3[i].dept_id);
+  }
+
+  console.log(students);
+  res.render('student/select_student_timetable', {
+    page_name: 'timetable',
+    students: students,
+    courses:courses,
+    classes:classes,
+    departments:departments
+  });
+};
+
 exports.getTimeTable = async (req, res, next) => {
-  const sql1 = 'SELECT * FROM student WHERE s_id = ?';
-  const studentData = (await queryParamPromise(sql1, [req.user]))[0];
+  console.log("timetable");
+  const {student, course, semester, department} = req.body;
+  const sql1 = 'SELECT * FROM student WHERE s_name = ?';
+  const studentData = (await queryParamPromise(sql1, student))[0];
+  console.log(studentData);
   const days = (
-    await queryParamPromise(
-      'select datediff(current_date(), ?) as diff',
-      studentData.joining_date
-    )
+      await queryParamPromise(
+          'select datediff(current_date(), ?) as diff',
+          studentData.joining_date
+      )
   )[0].diff;
-  const semester = Math.floor(days / 182) + 1;
+  //const sem = Math.floor(days / 182) + 1;
   let coursesData = await queryParamPromise(
-    'select c_id from course where dept_id = ? and semester = ?',
-    [studentData.dept_id, semester]
+      'select c_id from course where dept_id = ? and semester = ?',
+      [department, semester]
   );
   for (let i = 0; i < coursesData.length; ++i) {
     coursesData[i] = coursesData[i].c_id;
   }
-
+  console.log(coursesData);
   let timeTableData = await queryParamPromise(
-    'select * from time_table where c_id in (?) and section = ? order by day, start_time',
-    [coursesData, studentData.section]
+      'select * from time_table where c_id in (?) and section = ? order by day, start_time',
+      [coursesData, studentData.section]
   );
+  console.log(timeTableData);
   const classesData = await queryParamPromise(
-    'select c_id, st_id from class where c_id in (?) and section = ?',
-    [coursesData, studentData.section]
+      'select c_id, st_id from class where c_id in (?) and section = ?',
+      [coursesData, studentData.section]
   );
   for (let classData of classesData) {
     const staffName = (
-      await queryParamPromise('select st_name from staff where st_id = ?', [
-        classData.st_id,
-      ])
+        await queryParamPromise('select st_name from staff where st_id = ?', [
+          classData.st_id,
+        ])
     )[0].st_name;
     const courseName = (
-      await queryParamPromise('select name from course where c_id = ?', [
-        classData.c_id,
-      ])
+        await queryParamPromise('select name from course where c_id = ?', [
+          classData.c_id,
+        ])
     )[0].name;
     classData.staffName = staffName;
     classData.courseName = courseName;
   }
-  const startTimes = ['10:00', '11:00', '12:00', '13:00'];
-  const endTimes = ['11:00', '12:00', '13:00', '14:00'];
+  const startTimes = ['10:00:00', '11:00:00', '12:00:00', '13:00:00'];
+  const endTimes = ['11:00:00', '12:00:00', '13:00:00', '14:00:00'];
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  res.render('Student/timetable', {
-    page_name: 'Time Table',
+  res.render('student/timetable', {
+    page_name: 'timetable',
     studentData,
     semester,
     timeTableData,
@@ -278,8 +321,8 @@ const storage = multer.diskStorage({
     cb(null, "public/doc")
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + "-" + file.originalname + ".pdf");
-    uploadFile = file.fieldname + "-" + file.originalname + ".pdf";
+    cb(null, file.originalname);
+    uploadFile = file.originalname;
   }
 });
 
@@ -301,8 +344,8 @@ const upload = multer({
       return cb(null, true);
     }
 
-    cb("Error: File upload only supports the "
-        + "following filetypes - " + filetypes);
+    return cb("Error: File upload only supports the "
+        + "following filetypes - " + filetypes,null);
   }
 
 // SMS is the name of file attribute
@@ -319,15 +362,20 @@ exports.postAssignmentUpload = async (req, res, next) => {
         // ERROR occured (here it can be occured due
         // to uploading image of size greater than
         // 1MB or uploading different file type)
-        res.send(err)
+        console.log(err);
+        req.flash('error_msg','Error');
+        res.redirect('/Student/uploadAssignment');
       } else {
 
         // SUCCESS, image successfully uploaded
+        const user = req.user;
         const sql3 = 'INSERT INTO file SET ?';
         await queryParamPromise(sql3, {
           id: uuidv4(),
           name: uploadFile,
           description: '/doc/' + uploadFile,
+          subject_name:req.body.subjectName,
+          s_id: user
         });
         req.flash('success_msg', 'Your File uploaded in to SMS');
         res.redirect('/Student/uploadAssignment');
@@ -336,22 +384,80 @@ exports.postAssignmentUpload = async (req, res, next) => {
   }
 };
 
+exports.getEditSpecificAssignment = async (req, res, next) => {
+  const fileId = req.params.id;
+  const sql = 'SELECT name FROM course';
+  const results = await zeroParamPromise(sql);
+  res.cookie("id",fileId);
+    res.render('Student/editSpecificAssignment', {
+      subjectNames:results,
+      page_name: 'editSpecificAssignment',
+    });
+}
+
+exports.putEditSpecificAssignment = async (req, res, next) => {
+  if (req.method == "POST") {
+    // create an incoming form object
+    upload(req,res,async function (err) {
+
+      if (err) {
+
+        // ERROR occured (here it can be occured due
+        // to uploading image of size greater than
+        // 1MB or uploading different file type)
+        console.log(err);
+        req.flash('error_msg','Error');
+        res.redirect('/staff/assignmentsByTeacher');
+      } else {
+
+        // SUCCESS, image successfully uploaded
+        // SUCCESS, image successfully uploaded
+        const subjectName =  req.body
+        const user = req.user;
+        const fileId = req.cookies.id;
+        const path = '/doc/' + uploadFile;
+        const sql2 = 'update file set name=?, description=?, subject_name=? where id=?';
+        await queryParamPromise(sql2, [uploadFile,path,subjectName.subjectName,fileId]);
+        req.flash('success_msg', 'Your File resubmitted in to SMS');
+        res.clearCookie("id");
+        res.redirect('/Student/uploadAssignment');
+      }
+    });
+  }
+
+};
+
 exports.getAssignmentUpload = async (req, res, next) => {
+  const sql = 'SELECT name FROM course';
+  const results = await zeroParamPromise(sql);
+  const user = req.user;
+  const sql1 = 'SELECT * FROM file WHERE s_id = ?';
+  const fileData = await queryParamPromise(sql1, [user]);
+  let fileNames = [];
+  let fileId = [];
+  for (let i = 0; i < fileData.length; i++) {
+    fileNames.push(fileData[i].name);
+    fileId.push(fileData[i].id);
+  }
   if(req.method == "GET"){
     res.render('Student/uploadAssignment', {
+      subjectNames:results,
       page_name: 'uploadAssignment',
       uploadFilePath: '/doc/'+ uploadFile,
+      uploadedFile: fileNames,
+      uploadFileId:fileId,
     });
+    fileNames = [];
+    fileId = [];
   }
 }
 
 exports.viewAssignment = async (req, res, next) => {
-  const sql = 'SELECT name FROM assignmentfile';
-  const results = await zeroParamPromise(sql);
+  const sql1 = 'SELECT name FROM assignmentfile';
+  const results = await queryParamPromise(sql1);
   let assignmentFileNames = [];
   for (let i = 0; i < results.length; i++) {
     assignmentFileNames.push(results[i].name);
-    console.log(results[i].name);
   }
   res.render('Student/viewAssignment', {
     uploadFileNames: assignmentFileNames,
@@ -361,14 +467,51 @@ exports.viewAssignment = async (req, res, next) => {
 }
 
 exports.getSpecificAssignment = async (req, res, next) => {
+  const sql = 'SELECT name FROM course';
+  const results = await zeroParamPromise(sql);
+  const studentFileName = req.params.name;
+  const sql1 = 'SELECT * FROM file WHERE name = ?';
+  const fileData = await queryParamPromise(sql1, [studentFileName]);
+
+  res.render('Student/viewSpecificAssignment', {
+    fileData: fileData[0].description,
+    page_name: 'viewSpecificAssignment' ,
+    subjectNames:results,
+  });
+
+}
+
+exports.getTodoAssignment = async (req, res, next) => {
+  const sql = 'SELECT name FROM course';
+  const results = await zeroParamPromise(sql);
   const studentFileName = req.params.name;
   const sql1 = 'SELECT * FROM assignmentfile WHERE name = ?';
   const fileData = await queryParamPromise(sql1, [studentFileName]);
-  console.log("fileData[0].description",fileData[0].description);
 
-  res.render('Staff/viewSpecificAssignment', {
+  res.render('Student/viewSpecificAssignment', {
     fileData: fileData[0].description,
     page_name: 'viewSpecificAssignment' ,
+    subjectNames:results,
+  });
+
+}
+
+exports.getAssignmentMarks = async (req, res, next) => {
+  const sql1 = 'SELECT * FROM marks';
+  const marksData = (await queryParamPromise(sql1));
+  res.render('Student/viewMarks', {
+    page_name: 'viewMarks',
+    marksData: marksData,
+  });
+}
+
+exports.postAssignmentMarks = async (req, res, next) => {
+  const {test_name, course_name} = req.body;
+  const sql3 = 'select * from marks where test_name = ? and course_name in (?)';
+  const selectedMarksData = await queryParamPromise(sql3, [test_name, course_name]);
+  res.render('Student/viewSelectedMarks', {
+    page_name: 'viewSelectedMarks',
+    selectedMarksData: selectedMarksData,
   });
 
 }
@@ -404,7 +547,7 @@ exports.forgotPassword = async (req, res, next) => {
 
   console.log(token);
   const data = {
-    from: 'pulsarasandeepa123@gmail.com',
+    from: 'school.management@gmail.com',
     to: email,
     subject: 'Reset Password Link',
     html: `<h2>Please click on given link to reset your password</h2>
@@ -484,3 +627,39 @@ exports.resetPassword = (req, res, next) => {
     }
   }
 };
+
+exports.viewQuiz = async (req, res, next) => {
+  const sql1 = 'SELECT * FROM quizDetails';
+  const results = await queryParamPromise(sql1);
+  res.render('Student/viewQuiz', {
+    quizDetails: results,
+    page_name: 'viewQuiz'
+  });
+}
+
+exports.getSpecificQuiz = async (req, res, next) => {
+  const quiz_id = req.params.id;
+  const sql1 = 'SELECT * FROM quizcreate WHERE quiz_id = ?';
+  let quizData = await queryParamPromise(sql1, [quiz_id]);
+  const sql2 = 'SELECT numberOfQuestions FROM quizdetails WHERE quiz_id = ?';
+  const numberOfQuestions = await queryParamPromise(sql2, [quiz_id]);
+
+  res.render('Student/viewSpecificQuiz', {
+    questions: quizData,
+    page_name: 'viewSpecificQuiz' ,
+    numberOfQuestions:numberOfQuestions[0].numberOfQuestions,
+  });
+
+}
+
+exports.postViewSpecificQuiz = async (req, res, next) => {
+  for (let i = 0; i < req.body.answer.length; i++) {
+    await queryParamPromise('insert into answer set ?', {
+      quiz_id: req.cookies.quiz_id,
+      answers: req.body.answer[i],
+      answeredBy: req.user,
+    });
+  }
+  req.flash('success_msg', ' Answered successfully');
+  res.redirect('/student/dashboard');
+}
